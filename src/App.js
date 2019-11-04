@@ -3,7 +3,7 @@ import Game from './components/game'
 
 function App() {
   return (
-    <div className="App">
+    <div className="App container-fluid">
       <Game />
     </div>
   )

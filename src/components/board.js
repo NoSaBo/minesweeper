@@ -28,7 +28,7 @@ function Board() {
       {arrBoard.map((row, i) => (
         <div className="row">
           {row.map((cell, i) => (
-            <div className="col">
+            <div className="">
               <Cell {...cell} />
             </div>
           ))}

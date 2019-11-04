@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
+import 'bootstrap/dist/css/bootstrap.css'
 
 function Cell(props) {
-  console.log('data: ', props)
   return (
-    <div style={{ width: '10px', height: '10px', padding: '2px' }}>
+    <div className="m-1 p-2 border border-light bg-light">
       <span>{props.isMarked ? 'M' : props.isHidden ? '' : props.value}</span>
     </div>
   )
