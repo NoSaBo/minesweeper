@@ -3,8 +3,10 @@ import 'bootstrap/dist/css/bootstrap.css'
 
 function Cell(props) {
   return (
-    <div className="m-1 p-2 border border-light bg-light">
-      <span>{props.isMarked ? 'M' : props.isHidden ? '' : props.value}</span>
+    <div className="border border-light">
+      <button type="button" className="p-3 btn btn-light">
+        {props.isMarked ? 'M' : props.isHidden ? '' : props.value}
+      </button>
     </div>
   )
 }

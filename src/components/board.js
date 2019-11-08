@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import Cell from './cell'
 import 'bootstrap/dist/css/bootstrap.css'
 
+/** Create the board */
 const createBoard = (x, y) => {
   let arr = []
   const initCell = {
@@ -19,9 +20,28 @@ const createBoard = (x, y) => {
   return arr
 }
 
+const getRandomInteger = (min, max) => {
+  return Math.floor(Math.random() * (max - min)) + min
+}
+
+/** Fill the board with mines */
+const putMines = (board, density, x, y) => {
+  let numberOfMines = Math.floor(x * y * density)
+  while (numberOfMines) {
+    let _x = getRandomInteger(0, x)
+    let _y = getRandomInteger(0, y)
+    if (board[_x][_y] !== -1) {
+      board[_x][_y] = { ...board[_x][_y], value: -1 }
+      numberOfMines--
+    }
+  }
+  return board
+}
+
 function Board() {
-  const size = { x: 4, y: 4 }
-  const arrBoard = createBoard(size.x, size.y)
+  const size = { x: 6, y: 6 }
+  let arrBoard = createBoard(size.x, size.y)
+  arrBoard = putMines(arrBoard, 0.5, size.x, size.y)
 
   return (
     <div>
