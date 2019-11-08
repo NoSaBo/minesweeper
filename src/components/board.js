@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import Cell from './cell'
 import 'bootstrap/dist/css/bootstrap.css'
+import { tsPropertySignature } from '@babel/types'
 
 /** Create the board */
 const createBoard = (x, y) => {
@@ -38,18 +39,26 @@ const putMines = (board, density, x, y) => {
   return board
 }
 
-function Board() {
+function Board(props) {
   const size = { x: 6, y: 6 }
   let arrBoard = createBoard(size.x, size.y)
   arrBoard = putMines(arrBoard, 0.5, size.x, size.y)
 
   return (
     <div>
-      {arrBoard.map((row, i) => (
+      {arrBoard.map((row, y) => (
         <div className="row">
-          {row.map((cell, i) => (
+          {row.map((cell, x) => (
             <div className="">
-              <Cell {...cell} />
+              <Cell
+                {...cell}
+                onLeftClick={() => {
+                  if (arrBoard[y][x] === -1) props.loseGame()
+                }}
+                onRightClick={() => {
+                  arrBoard[y][x] = { ...arrBoard[y][x], isMarked: true }
+                }}
+              />
             </div>
           ))}
         </div>
