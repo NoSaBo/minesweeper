@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Mine, Flag } from './icons'
 import 'bootstrap/dist/css/bootstrap.css'
 
