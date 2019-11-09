@@ -45,20 +45,39 @@ const placeMines = (board, mines) => {
 };
 
 /** Fill the board with values of bomb neighbors */
-const setBombNeighbors = (board, mines) => {
+const setBombNeighbors = (board, x, y) => {
+  let steps = [-1, 0, 1];
+  for (let i = 0; i < x; i++) {
+    for (let j = 0; j < y; j++) {
+      if (board[i][j].value !== -1) {
+        for (let stepX of steps) {
+          for (let stepY of steps) {
+            if (!(stepX === 0 && stepY === 0)) {
+              if (
+                board[i + stepX] &&
+                board[i + stepX][j + stepY] &&
+                board[i + stepX][j + stepY].value === -1
+              )
+                board[i][j].value++;
+            }
+          }
+        }
+      }
+    }
+  }
   return board;
 };
 
 const createBoard = (cols, rows, density) => {
   let board = initializeBoard(cols, rows);
   placeMines(board, createMines(density, cols, rows));
-  setBombNeighbors(board);
+  setBombNeighbors(board, cols, rows);
   return board;
 };
 
 function Board() {
   const size = { x: 6, y: 6 }; // Fixed size of board
-  let arrBoard = createBoard(size.x, size.y, 0.5); // Fixed density
+  let arrBoard = createBoard(size.x, size.y, 0.4); // Fixed density
 
   return (
     <div>
