@@ -73,23 +73,32 @@ const createBoard = (cols, rows, density) => {
 };
 
 const revealEmptyCells = (board, x, y) => {
-  let steps = [-1, 0, 1];
-  board[x][y].isHidden = false;
-  for (let stepX of steps) {
-    for (let stepY of steps) {
-      if (!(stepX === 0 && stepY === 0)) {
-        let coordExistsAndHidden =
-          board[x + stepX] &&
-          board[x + stepX][y + stepY] &&
-          board[x + stepX][y + stepY].isHidden === true;
-        if (coordExistsAndHidden && board[x + stepX][y + stepY].value > 0)
-          board[x + stepX][y + stepY].isHidden = false;
-        if (coordExistsAndHidden && board[x + stepX][y + stepY].value === 0)
-          revealEmptyCells(board, x, y);
+  let newBoard = [...board];
+  if (newBoard[y][x].value !== 0) {
+    newBoard[y][x].isHidden = false;
+    return newBoard;
+  } else {
+    let steps = [-1, 0, 1];
+    newBoard[y][x].isHidden = false;
+    for (let stepX of steps) {
+      for (let stepY of steps) {
+        if (!(stepX === 0 && stepY === 0)) {
+          let coordExistsAndHidden =
+            newBoard[y + stepY] &&
+            newBoard[y + stepY][x + stepX] &&
+            newBoard[y + stepY][x + stepX].isHidden === true;
+          if (coordExistsAndHidden && newBoard[y + stepY][x + stepX].value > 0)
+            newBoard[y + stepY][x + stepX].isHidden = false;
+          if (
+            coordExistsAndHidden &&
+            newBoard[y + stepY][x + stepX].value === 0
+          )
+            newBoard = revealEmptyCells(newBoard, x + stepX, y + stepY);
+        }
       }
     }
   }
-  return board;
+  return newBoard;
 };
 
 function Board(props) {
@@ -104,16 +113,21 @@ function Board(props) {
               <Cell
                 {...cell}
                 onLeftClick={() => {
+                  if (!props.isActive) return;
                   if (!arrBoard[y][x].isMarked) {
-                    console.log("value: ", arrBoard[y][x].value);
-                    if (arrBoard[y][x].value === -1) props.loseGame();
-                    if (arrBoard[y][x].value === 0) {
+                    if (arrBoard[y][x].value === -1) {
+                      let newArrBoard = [...arrBoard];
+                      newArrBoard[y][x].isHidden = false;
+                      setBoard(newArrBoard);
+                      props.loseGame();
+                    } else {
                       const newArr = revealEmptyCells(arrBoard, x, y);
                       setBoard(newArr);
                     }
                   }
                 }}
                 onRightClick={() => {
+                  if (!props.isActive) return;
                   let newArrBoard = [...arrBoard];
                   newArrBoard[y][x].isMarked = !newArrBoard[y][x].isMarked;
                   setBoard(newArrBoard);
