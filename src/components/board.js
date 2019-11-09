@@ -6,7 +6,7 @@ import "bootstrap/dist/css/bootstrap.css";
 const initializeBoard = (x, y) => {
   let arr = [];
   const initCell = {
-    isHidden: false,
+    isHidden: true,
     isMarked: false,
     value: 0
   };
@@ -30,7 +30,7 @@ const createMines = (density, x, y) => {
   const mines = [];
   while (numberOfMines) {
     let coord = { x: getRandomInteger(0, x), y: getRandomInteger(0, y) };
-    if (!mines.includes(coord)) {
+    if (!mines.some(mine => mine.x === coord.x && mine.y === coord.y)) {
       mines.push(coord);
       numberOfMines--;
     }
@@ -45,38 +45,55 @@ const placeMines = (board, mines) => {
 };
 
 /** Fill the board with values of bomb neighbors */
-const setBombNeighbors = (board, x, y) => {
+const setBombNeighbors = (board, mines) => {
   let steps = [-1, 0, 1];
-  for (let i = 0; i < x; i++) {
-    for (let j = 0; j < y; j++) {
-      if (board[i][j].value !== -1) {
-        for (let stepX of steps) {
-          for (let stepY of steps) {
-            if (!(stepX === 0 && stepY === 0)) {
-              if (
-                board[i + stepX] &&
-                board[i + stepX][j + stepY] &&
-                board[i + stepX][j + stepY].value === -1
-              )
-                board[i][j].value++;
-            }
-          }
+  mines.forEach(mine => {
+    for (let stepX of steps) {
+      for (let stepY of steps) {
+        if (!(stepX === 0 && stepY === 0)) {
+          if (
+            board[mine.x + stepX] &&
+            board[mine.x + stepX][mine.y + stepY] &&
+            board[mine.x + stepX][mine.y + stepY].value !== -1
+          )
+            board[mine.x + stepX][mine.y + stepY].value++;
         }
+      }
+    }
+  });
+  return board;
+};
+
+const createBoard = (cols, rows, density) => {
+  let board = initializeBoard(cols, rows);
+  let mines = createMines(density, cols, rows);
+  placeMines(board, mines);
+  setBombNeighbors(board, mines);
+  return board;
+};
+
+const revealEmptyCells = (board, x, y) => {
+  let steps = [-1, 0, 1];
+  board[x][y].isHidden = false;
+  for (let stepX of steps) {
+    for (let stepY of steps) {
+      if (!(stepX === 0 && stepY === 0)) {
+        let coordExistsAndHidden =
+          board[x + stepX] &&
+          board[x + stepX][y + stepY] &&
+          board[x + stepX][y + stepY].isHidden === true;
+        if (coordExistsAndHidden && board[x + stepX][y + stepY].value > 0)
+          board[x + stepX][y + stepY].isHidden = false;
+        if (coordExistsAndHidden && board[x + stepX][y + stepY].value === 0)
+          revealEmptyCells(board, x, y);
       }
     }
   }
   return board;
 };
 
-const createBoard = (cols, rows, density) => {
-  let board = initializeBoard(cols, rows);
-  placeMines(board, createMines(density, cols, rows));
-  setBombNeighbors(board, cols, rows);
-  return board;
-};
-
 function Board(props) {
-  const [arrBoard, setBoard] = useState(createBoard(8, 8, 0.2)); // Fixed density, size
+  const [arrBoard, setBoard] = useState(createBoard(10, 10, 0.1)); // Fixed density, size
 
   return (
     <div>
@@ -88,7 +105,12 @@ function Board(props) {
                 {...cell}
                 onLeftClick={() => {
                   if (!arrBoard[y][x].isMarked) {
+                    console.log("value: ", arrBoard[y][x].value);
                     if (arrBoard[y][x].value === -1) props.loseGame();
+                    if (arrBoard[y][x].value === 0) {
+                      const newArr = revealEmptyCells(arrBoard, x, y);
+                      setBoard(newArr);
+                    }
                   }
                 }}
                 onRightClick={() => {
