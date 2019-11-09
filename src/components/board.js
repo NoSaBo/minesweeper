@@ -75,17 +75,28 @@ const createBoard = (cols, rows, density) => {
   return board;
 };
 
-function Board() {
-  const size = { x: 6, y: 6 }; // Fixed size of board
-  let arrBoard = createBoard(size.x, size.y, 0.4); // Fixed density
+function Board(props) {
+  const [arrBoard, setBoard] = useState(createBoard(8, 8, 0.2)); // Fixed density, size
 
   return (
     <div>
-      {arrBoard.map((row, i) => (
-        <div className="row">
-          {row.map((cell, i) => (
-            <div className="">
-              <Cell {...cell} />
+      {arrBoard.map((row, y) => (
+        <div className="row" key={`row-${y}`}>
+          {row.map((cell, x) => (
+            <div className="" key={`cell-${x}`}>
+              <Cell
+                {...cell}
+                onLeftClick={() => {
+                  if (!arrBoard[y][x].isMarked) {
+                    if (arrBoard[y][x].value === -1) props.loseGame();
+                  }
+                }}
+                onRightClick={() => {
+                  let newArrBoard = [...arrBoard];
+                  newArrBoard[y][x].isMarked = !newArrBoard[y][x].isMarked;
+                  setBoard(newArrBoard);
+                }}
+              />
             </div>
           ))}
         </div>
