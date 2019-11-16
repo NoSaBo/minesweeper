@@ -4,9 +4,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 
 function Board(props) {
   return (
-    <div>
+    <div clasName="container">
       {props.arrBoard.map((row, y) => (
-        <div className="row" key={`row-${y}`}>
+        <div className="row justify-content-md-center" key={`row-${y}`}>
           {row.map((cell, x) => (
             <div className="" key={`cell-${x}`}>
               <Cell

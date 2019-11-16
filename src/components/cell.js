@@ -29,7 +29,7 @@ function Cell(props) {
         ) : props.isHidden ? (
           <div style={{ height: '25px', width: '25px' }} />
         ) : props.value === -1 ? (
-          <Mine width="25" height="25" />
+          <Mine width="25" height="25" color="salmon" />
         ) : (
           <div
             className={'text-center'}

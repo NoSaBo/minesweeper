@@ -1,17 +1,18 @@
 import React, { useState } from 'react'
 import Board from './board'
+import Modal from './modal'
 import { createBoard, revealEmptyCells, isWinner } from '../engine/engine'
 
 function Game() {
   const numberOfMines = Math.floor(10, 10, 0.1)
-  const [message, setMessage] = useState('Juega chats')
+  const [message, setMessage] = useState('MineSweeper')
   const [isActive, setActive] = useState(true)
   const [arrBoard, setBoard] = useState(createBoard(10, 10, numberOfMines)) // Fixed density, size
 
   const handleReset = () => {
     setBoard(createBoard(10, 10, numberOfMines))
     setActive(true)
-    setMessage('Juega de nuevo')
+    setMessage('MineSweeper')
   }
 
   const handleLeftClick = (x, y) => {
@@ -41,12 +42,16 @@ function Game() {
   }
   return (
     <div>
-      <h1 className="text-center">{message}</h1>
-      {message === 'You lose' ? (
-        <div className="btn btn-primary" onClick={handleReset}>
-          Reset Game
-        </div>
+      {message !== 'MineSweeper' ? (
+        <Modal
+          child={
+            <button className="btn btn-primary" onClick={handleReset}>
+              Try again
+            </button>
+          }
+        ></Modal>
       ) : null}
+      <h1 className="text-center">{message}</h1>
       <Board
         isActive={isActive}
         arrBoard={arrBoard}
