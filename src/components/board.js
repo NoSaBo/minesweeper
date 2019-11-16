@@ -1,6 +1,6 @@
-import React from 'react'
-import Cell from './cell'
-import 'bootstrap/dist/css/bootstrap.css'
+import React from "react";
+import Cell from "./cell";
+import "bootstrap/dist/css/bootstrap.css";
 
 function Board(props) {
   return (
@@ -12,10 +12,10 @@ function Board(props) {
               <Cell
                 {...cell}
                 onLeftClick={() => {
-                  props.onLeftClick(x, y)
+                  props.onLeftClick(x, y);
                 }}
                 onRightClick={() => {
-                  props.onRightClick(x, y)
+                  props.onRightClick(x, y);
                 }}
               />
             </div>
@@ -23,7 +23,7 @@ function Board(props) {
         </div>
       ))}
     </div>
-  )
+  );
 }
 
-export default Board
+export default Board;
