@@ -1,4 +1,4 @@
-const initializeBoard = (x, y) => {
+export const initializeBoard = (x, y) => {
   let arr = []
   const initCell = {
     isHidden: true,
@@ -19,12 +19,27 @@ const getRandomInteger = (min, max) => {
   return Math.floor(Math.random() * (max - min)) + min
 }
 
-/** Create list of mines */
-const createMines = (numberOfMines, x, y) => {
+const checkIfMinesIsNotNeighbor = (xMines, yMines, xPos, yPos) => {
+  let steps = [-1, 0, 1]
+  for (let stepX of steps) {
+    for (let stepY of steps) {
+      if (xPos + stepX === xMines && yPos + stepY === yMines) return false
+    }
+  }
+  return true
+}
+
+/** Create list of mines, requires the first xpos and ypos to avoid creating a mine in that position */
+const createMines = (numberOfMines, cols, rows, xPos, yPos) => {
   const mines = []
   while (numberOfMines) {
-    let coord = { x: getRandomInteger(0, x), y: getRandomInteger(0, y) }
-    if (!mines.some(mine => mine.x === coord.x && mine.y === coord.y)) {
+    let coord = { x: getRandomInteger(0, cols), y: getRandomInteger(0, rows) }
+    console.log(coord.x, coord.y, xPos, yPos)
+    if (
+      !mines.some(mine => mine.x === coord.x && mine.y === coord.y) &&
+      checkIfMinesIsNotNeighbor(coord.x, coord.y, xPos, yPos)
+    ) {
+      console.log(`pass`, coord.x, coord.y, xPos, yPos)
       mines.push(coord)
       numberOfMines--
     }
@@ -34,7 +49,7 @@ const createMines = (numberOfMines, x, y) => {
 
 /** Fill the board with mines */
 const placeMines = (board, mines) => {
-  mines.forEach(coord => (board[coord.x][coord.y].value = -1))
+  mines.forEach(coord => (board[coord.y][coord.x].value = -1))
   return board
 }
 
@@ -46,11 +61,11 @@ const setBombNeighbors = (board, mines) => {
       for (let stepY of steps) {
         if (!(stepX === 0 && stepY === 0)) {
           if (
-            board[mine.x + stepX] &&
-            board[mine.x + stepX][mine.y + stepY] &&
-            board[mine.x + stepX][mine.y + stepY].value !== -1
+            board[mine.y + stepY] &&
+            board[mine.y + stepY][mine.x + stepX] &&
+            board[mine.y + stepY][mine.x + stepX].value !== -1
           )
-            board[mine.x + stepX][mine.y + stepY].value++
+            board[mine.y + stepY][mine.x + stepX].value++
         }
       }
     }
@@ -58,9 +73,9 @@ const setBombNeighbors = (board, mines) => {
   return board
 }
 
-export const createBoard = (cols, rows, numberOfMines) => {
+export const createBoard = (cols, rows, numberOfMines, xPos, yPos) => {
   let board = initializeBoard(cols, rows)
-  let mines = createMines(numberOfMines, cols, rows)
+  let mines = createMines(numberOfMines, cols, rows, xPos, yPos)
   placeMines(board, mines)
   setBombNeighbors(board, mines)
   return board

@@ -1,35 +1,45 @@
 import React, { useState } from 'react'
 import Board from './board'
 import Modal from './modal'
-import { createBoard, revealEmptyCells, isWinner } from '../engine/engine'
+import { createBoard, revealEmptyCells, isWinner, initializeBoard } from '../engine/engine'
 
 function Game() {
   const numberOfMines = Math.floor(10, 10, 0.1)
   const [message, setMessage] = useState('MineSweeper')
   const [isActive, setActive] = useState(true)
-  const [arrBoard, setBoard] = useState(createBoard(10, 10, numberOfMines)) // Fixed density, size
+  const [isFirstClick, setFirstClick] = useState(true)
+  const [arrBoard, setBoard] = useState(initializeBoard(10, 10)) // Fixed density, size
 
   const handleReset = () => {
-    setBoard(createBoard(10, 10, numberOfMines))
+    setBoard(initializeBoard(10, 10))
     setActive(true)
+    setFirstClick(true)
     setMessage('MineSweeper')
   }
 
   const handleLeftClick = (x, y) => {
+    let updatedBoard = [...arrBoard]
+
+    if (isFirstClick) {
+      updatedBoard = createBoard(10, 10, numberOfMines, x, y)
+      console.log(updatedBoard)
+    }
     if (!isActive) return
-    if (!arrBoard[y][x].isMarked) {
-      if (arrBoard[y][x].value === -1) {
-        let newArrBoard = [...arrBoard]
+    if (!updatedBoard[y][x].isMarked) {
+      if (updatedBoard[y][x].value === -1) {
+        let newArrBoard = [...updatedBoard]
         newArrBoard[y][x].isHidden = false
         setBoard(newArrBoard)
         setMessage('You lose')
         setActive(false)
+        setFirstClick(true)
       } else {
-        const newArr = revealEmptyCells(arrBoard, x, y)
-        if (isWinner(arrBoard, numberOfMines)) {
+        const newArr = revealEmptyCells(updatedBoard, x, y)
+        if (isWinner(updatedBoard, numberOfMines)) {
           setMessage('You Win')
           setActive(false)
         }
+        setFirstClick(false)
         setBoard(newArr)
       }
     }
