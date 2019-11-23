@@ -71,8 +71,8 @@ function Game() {
 
   const getGif = didWin => {
     let url = didWin
-      ? "http://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=celebrate"
-      : "http://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=cry"
+      ? "https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=celebrate"
+      : "https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=cry"
     axios.get(url)
       .then(data => setGif(data.data.data.image_url))
       .catch(error => console.log(`error getting gif`, error))
