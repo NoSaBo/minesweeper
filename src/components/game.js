@@ -8,22 +8,32 @@ import {
   isWinner,
   initializeBoard
 } from "../engine/engine";
+import axios from 'axios'
+
+let timer
 
 function Game() {
+  /** State declarations */
   const [config, setConfig] = useState({ row: 8, col: 8, density: 0.1 });
-  const numberOfMines = Math.floor(config.row * config.col * config.density);
   const [message, setMessage] = useState("MineSweeper");
   const [isActive, setActive] = useState(true);
   const [isFirstClick, setFirstClick] = useState(true);
   const [arrBoard, setBoard] = useState(
     initializeBoard(config.row, config.col)
   );
+  const [difficulty, setDifficulty] = useState("medium")
+  const [time, setTime] = useState(0)
+  const [winGif, setGif] = useState('')
+
+  const numberOfMines = Math.floor(config.row * config.col * config.density);
 
   const handleReset = () => {
-    setBoard(initializeBoard(config.row, config.col));
-    setActive(true);
-    setFirstClick(true);
-    setMessage("MineSweeper");
+    setBoard(initializeBoard(config.row, config.col))
+    setActive(true)
+    setFirstClick(true)
+    setMessage("MineSweeper")
+    setTime(0)
+    setGif("")
   };
 
   const setGameConfig = str => {
@@ -54,12 +64,25 @@ function Game() {
     setActive(true);
     setFirstClick(true);
     setMessage("MineSweeper");
-  };
+    setDifficulty(str)
+    clearInterval(timer)
+    setTime(0)
+  }
+
+  const getGif = didWin => {
+    let url = didWin
+      ? "http://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=celebrate"
+      : "http://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=cry"
+    axios.get(url)
+      .then(data => setGif(data.data.data.image_url))
+      .catch(error => console.log(`error getting gif`, error))
+  }
 
   const handleLeftClick = (x, y) => {
     let updatedBoard = [...arrBoard];
 
     if (isFirstClick) {
+      timer = setInterval(() => setTime(time => time + 1), 1000)
       updatedBoard = createBoard(config.row, config.col, numberOfMines, x, y);
       console.log(updatedBoard);
     }
@@ -68,15 +91,19 @@ function Game() {
       if (updatedBoard[y][x].value === -1) {
         let newArrBoard = [...updatedBoard];
         newArrBoard[y][x].isHidden = false;
-        setBoard(newArrBoard);
-        setMessage("You lose");
-        setActive(false);
-        setFirstClick(true);
+        setBoard(newArrBoard)
+        setMessage("You lose")
+        clearInterval(timer)
+        setActive(false)
+        setFirstClick(true)
+        getGif(false)
       } else {
         const newArr = revealEmptyCells(updatedBoard, x, y);
         if (isWinner(updatedBoard, numberOfMines)) {
-          setMessage("You Win");
-          setActive(false);
+          setMessage("You Win")
+          setActive(false)
+          clearInterval(timer)
+          getGif(true)
         }
         setFirstClick(false);
         setBoard(newArr);
@@ -85,44 +112,63 @@ function Game() {
   };
 
   const handleRightClick = (x, y) => {
-    if (!isActive) return;
+    if (!isActive || !arrBoard[y][x].isHidden) return;
     let newArrBoard = [...arrBoard];
     newArrBoard[y][x].isMarked = !newArrBoard[y][x].isMarked;
     setBoard(newArrBoard);
   };
 
-  return (
-    <div>
-      {message !== "MineSweeper" ? (
-        <Modal
-          child={
-            <button className="btn btn-primary" onClick={handleReset}>
-              Try again
-            </button>
-          }
-        ></Modal>
-      ) : null}
-      <h1 className="text-center py-2 my-1">{message}</h1>
-      <div className="py-2 my-1">
-        <Dropdown>
-          <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-            Select Difficulty
-          </Dropdown.Toggle>
-          <Dropdown.Menu>
-            <Dropdown.Item onClick={() => setGameConfig("easy")}>
-              Easy
+  return [
+    message !== "MineSweeper" ? (
+      <Modal
+        child={
+          <div className="text-center">
+            <div className={"py-2"}>
+              <h2>{message === "You Win" ? `Congratulations! you did it in ${time} seconds` : `:(`}</h2>
+            </div>
+            <div className={"py-2"}>
+              <img src={winGif} />
+            </div>
+            <div className={"py-2"}>
+              <button className="btn btn-primary" onClick={handleReset}>
+                Try again
+          </button>
+            </div>
+          </div>
+        }
+      ></Modal>
+    ) : null,
+    <div className="container">
+      <h1 className="text-center py-2 my-1" style={{ fontVariant: "all-small-caps" }}>Mine Sweeper</h1>
+      <div className="row py-2 my-1">
+        <div className="col-sm text-center" key="dropdown">
+          <Dropdown>
+            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+              {difficulty[0].toUpperCase() + difficulty.slice(1)}
+            </Dropdown.Toggle>
+            <Dropdown.Menu>
+              <Dropdown.Item onClick={() => setGameConfig("easy")}>
+                Easy
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => setGameConfig("medium")}>
-              Medium
+              <Dropdown.Item onClick={() => setGameConfig("medium")}>
+                Medium
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => setGameConfig("hard")}>
-              Hard
+              <Dropdown.Item onClick={() => setGameConfig("hard")}>
+                Hard
             </Dropdown.Item>
-            <Dropdown.Item onClick={() => setGameConfig("godMode")}>
-              God Mode
+              <Dropdown.Item onClick={() => setGameConfig("godMode")}>
+                God Mode
             </Dropdown.Item>
-          </Dropdown.Menu>
-        </Dropdown>
+            </Dropdown.Menu>
+          </Dropdown>
+        </div>
+        <div className="col-sm text-center" key="number-of-mines">
+          Mines Left: {numberOfMines - arrBoard.reduce((accu, row) => accu + row.filter(cell => cell.isMarked).length, 0)}
+        </div>
+        <div className="col-sm text-center" key="timer">
+          {`${Math.floor(time / 60) < 10 ? '0' : ''}${Math.floor(time / 60)}:${time % 60 < 10 ? '0' : ''}${time % 60}`}
+        </div>
+
       </div>
       <Board
         isActive={isActive}
@@ -131,7 +177,7 @@ function Game() {
         onRightClick={handleRightClick}
       />
     </div>
-  );
+  ]
 }
 
 export default Game;
