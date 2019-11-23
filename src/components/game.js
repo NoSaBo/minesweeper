@@ -85,7 +85,7 @@ function Game() {
   };
 
   const handleRightClick = (x, y) => {
-    if (!isActive) return;
+    if (!isActive || !arrBoard[y][x].isHidden) return;
     let newArrBoard = [...arrBoard];
     newArrBoard[y][x].isMarked = !newArrBoard[y][x].isMarked;
     setBoard(newArrBoard);
