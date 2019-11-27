@@ -6,7 +6,7 @@ function Board(props) {
   return (
     <div className="container">
       {props.arrBoard.map((row, y) => (
-        <div className="row justify-content-md-center" key={`row-${y}`}>
+        <div className="row justify-content-center flex-nowrap" key={`row-${y}`}>
           {row.map((cell, x) => (
             <div className="" key={`cell-${x}`}>
               <Cell

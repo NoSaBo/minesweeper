@@ -3,13 +3,14 @@ import { Mine, Flag } from './icons'
 import 'bootstrap/dist/css/bootstrap.css'
 
 const generateColor = number => {
-  let r = number * 5
-  let g = number * 20
-  let b = number * 15
-  return `rgba(${r}, ${g}, ${b}, 1)`
+  return `hsla(${number < 5 ? number * 90 : (number * 90) + 45}, 90%, 30%, 1)`
 }
 
 function Cell(props) {
+  console.log("window size: ", window.innerWidth)
+  const wSize = window.innerWidth > 1000 ?  '70px' : '7vw';
+  const wIconSize = window.innerWidth > 1000 ?  '40px' : '3vw';
+  const fontSize = window.innerWidth > 1000 ?  '40px' : '3.5vw';
   return (
     <div
       className="border border-light"
@@ -18,34 +19,33 @@ function Cell(props) {
         e.preventDefault()
         props.onRightClick()
       }}
+      style={{ height: wSize, width: wSize }}
     >
       <button
         type="button"
-        className={`p-3 btn ${props.isHidden ? 'btn-secondary' : 'btn-light'}`}
-        style={{ border: 'thin solid silver' }}
+        className={`p-0 btn ${props.isHidden ? 'btn-secondary' : 'btn-light'}`}
+        style={{ border: 'thin solid silver', height: "100%", width: "100%" }}
       >
         {props.isMarked ? (
-          <Flag width="25" height="25" color="whitesmoke" />
+          <Flag width={wIconSize} height={wIconSize} color="whitesmoke" />
         ) : props.isHidden ? (
-          <div style={{ height: '25px', width: '25px' }} />
+          <div style={{ }} />
         ) : props.value === -1 ? (
-          <Mine width="25" height="25" color="salmon" />
+          <Mine width={wIconSize} height={wIconSize} color="salmon" />
         ) : (
-          <div
-            className={'text-center'}
-            style={{
-              height: '25px',
-              width: '25px',
-              color: generateColor(props.value),
-              fontSize: '1.5em',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {props.value === 0 ? '' : props.value}
-          </div>
-        )}
+                <div
+                  className={'text-center'}
+                  style={{
+                    color: generateColor(props.value),
+                    fontSize: fontSize,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  {props.value === 0 ? '' : props.value}
+                </div>
+              )}
       </button>
     </div>
   )

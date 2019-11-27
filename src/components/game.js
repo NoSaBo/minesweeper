@@ -70,9 +70,11 @@ function Game() {
   }
 
   const getGif = didWin => {
-    let url = didWin
-      ? "https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=celebrate"
-      : "https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=cry"
+    const tagWin = difficulty === "godMode" ? "epic" : "celebrate"
+    const tagLose = "cry"
+    const url = didWin
+      ? `https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=${tagWin}`
+      : `https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=${tagLose}`
     axios.get(url)
       .then(data => setGif(data.data.data.image_url))
       .catch(error => console.log(`error getting gif`, error))
@@ -127,7 +129,7 @@ function Game() {
               <h2>{message === "You Win" ? `Congratulations! you did it in ${time} seconds` : `:(`}</h2>
             </div>
             <div className={"py-2"}>
-              <img src={winGif} />
+              <img src={winGif} style={{ height: "200px" }} />
             </div>
             <div className={"py-2"}>
               <button className="btn btn-primary" onClick={handleReset}>
