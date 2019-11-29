@@ -5,6 +5,7 @@ import Modal from "./modal";
 import {
   createBoard,
   revealEmptyCells,
+  revealMines,
   isWinner,
   initializeBoard
 } from "../engine/engine";
@@ -41,10 +42,15 @@ function Game() {
     let col = 6;
     let density = 0.1;
     switch (str) {
+      case "easy":
+        row = 6
+        col = 6
+        density = 0.15
+        break
       case "medium":
         row = 8;
         col = 8;
-        density = 0.15;
+        density = 0.17;
         break;
       case "hard":
         row = 10;
@@ -52,9 +58,9 @@ function Game() {
         density = 0.2;
         break;
       case "godMode":
-        row = 10;
-        col = 10;
-        density = 0.3;
+        row = 12;
+        col = 12;
+        density = 0.25;
         break;
       default:
         break;
@@ -91,8 +97,7 @@ function Game() {
     if (!isActive) return;
     if (!updatedBoard[y][x].isMarked) {
       if (updatedBoard[y][x].value === -1) {
-        let newArrBoard = [...updatedBoard];
-        newArrBoard[y][x].isHidden = false;
+        let newArrBoard = revealMines(updatedBoard)
         setBoard(newArrBoard)
         setMessage("You lose")
         clearInterval(timer)
@@ -126,10 +131,10 @@ function Game() {
         child={
           <div className="text-center">
             <div className={"py-2"}>
-              <h2>{message === "You Win" ? `Congratulations! you did it in ${time} seconds` : `:(`}</h2>
+              <h2>{message === "You Win" ? `Congratulations! you beat '${difficulty}' in ${time} seconds` : `You lose :(`}</h2>
             </div>
             <div className={"py-2"}>
-              <img src={winGif} style={{ height: "200px" }} />
+              <img alt={"loading"} src={winGif} style={{ maxHeight: "60vh", maxWidth: "80vw" }} />
             </div>
             <div className={"py-2"}>
               <button className="btn btn-primary" onClick={handleReset}>
@@ -140,9 +145,9 @@ function Game() {
         }
       ></Modal>
     ) : null,
-    <div className="container">
+    <div className="container" key="board-container">
       <h1 className="text-center py-2 my-1" style={{ fontVariant: "all-small-caps" }}>Mine Sweeper</h1>
-      <div className="row py-2 my-1">
+      <div className="row py-2 my-1" key="game-setup">
         <div className="col-sm text-center" key="dropdown">
           <Dropdown>
             <Dropdown.Toggle variant="secondary" id="dropdown-basic">
@@ -150,16 +155,16 @@ function Game() {
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={() => setGameConfig("easy")}>
-                Easy
+                Easy 6x6
             </Dropdown.Item>
               <Dropdown.Item onClick={() => setGameConfig("medium")}>
-                Medium
+                Medium 8x8
             </Dropdown.Item>
               <Dropdown.Item onClick={() => setGameConfig("hard")}>
-                Hard
+                Hard 10x10
             </Dropdown.Item>
               <Dropdown.Item onClick={() => setGameConfig("godMode")}>
-                God Mode
+                God Mode 12x12
             </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>

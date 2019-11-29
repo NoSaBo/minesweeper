@@ -1,10 +1,13 @@
 export const initializeBoard = (x, y) => {
   let arr = [];
+
+  /** Structure of each cell */
   const initCell = {
     isHidden: true,
     isMarked: false,
     value: 0
   };
+
   for (let i = 0; i < x; i++) {
     let row = [];
     for (let j = 0; j < y; j++) {
@@ -108,7 +111,15 @@ export const revealEmptyCells = (board, x, y) => {
     }
   }
   return newBoard;
-};
+}
+
+/* When lose we display all the mines*/
+export const revealMines = (board) => {
+  return board.map(row => row.map(cell => {
+      return { ...cell, isHidden: cell.value === -1 ? false : cell.isHidden }
+    })
+  )
+}
 
 export const isWinner = (board, numberOfMines) =>
   board.reduce(

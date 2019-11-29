@@ -27,7 +27,7 @@ const Modal = props => {
   }
 
   return (
-    <div className="container-fluid" style={containerStyle}>
+    <div style={containerStyle}>
       <div style={modalStyle}></div>
       <div style={contentStyle}> {props.child} </div>
     </div>

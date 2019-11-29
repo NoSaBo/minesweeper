@@ -7,7 +7,6 @@ const generateColor = number => {
 }
 
 function Cell(props) {
-  console.log("window size: ", window.innerWidth)
   const wSize = window.innerWidth > 1000 ?  '70px' : '7vw';
   const wIconSize = window.innerWidth > 1000 ?  '40px' : '3vw';
   const fontSize = window.innerWidth > 1000 ?  '40px' : '3.5vw';
