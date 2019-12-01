@@ -2,71 +2,52 @@ import React, { useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import Board from "./board";
 import Modal from "./modal";
+import RankingTable from "./ranking-table";
 import {
   createBoard,
   revealEmptyCells,
   revealMines,
   isWinner,
   initializeBoard
-} from "../engine/engine";
+} from "../engine/engine"
+import { gameModes } from "../config/config"
+
 import axios from 'axios'
 
 let timer
 
 function Game() {
   /** State declarations */
-  const [config, setConfig] = useState({ row: 8, col: 8, density: 0.1 });
+  const [config, setConfig] = useState({ ...gameModes["medium"] });
   const [message, setMessage] = useState("MineSweeper");
   const [isActive, setActive] = useState(true);
   const [isFirstClick, setFirstClick] = useState(true);
   const [arrBoard, setBoard] = useState(
-    initializeBoard(config.row, config.col)
+    initializeBoard(config.rows, config.cols)
   );
   const [difficulty, setDifficulty] = useState("medium")
   const [time, setTime] = useState(0)
   const [winGif, setGif] = useState('')
+  const [userName, setUserName] = useState('')
 
-  const numberOfMines = Math.floor(config.row * config.col * config.density);
+  const [rankingData, setRankingTable] = useState(false)
+
+  const numberOfMines = Math.floor(config.rows * config.cols * config.density);
 
   const handleReset = () => {
-    setBoard(initializeBoard(config.row, config.col))
+    setBoard(initializeBoard(config.rows, config.cols))
     setActive(true)
     setFirstClick(true)
     setMessage("MineSweeper")
     setTime(0)
+    setRankingTable(false)
     setGif("")
   };
 
   const setGameConfig = str => {
-    let row = 6;
-    let col = 6;
-    let density = 0.1;
-    switch (str) {
-      case "easy":
-        row = 6
-        col = 6
-        density = 0.15
-        break
-      case "medium":
-        row = 8;
-        col = 8;
-        density = 0.17;
-        break;
-      case "hard":
-        row = 10;
-        col = 10;
-        density = 0.2;
-        break;
-      case "godMode":
-        row = 12;
-        col = 12;
-        density = 0.25;
-        break;
-      default:
-        break;
-    }
-    setConfig({ row, col, density });
-    setBoard(initializeBoard(row, col));
+    const gameMode = gameModes[str] || gameModes["medium"]
+    setConfig({ ...gameMode });
+    setBoard(initializeBoard(gameMode["rows"], gameMode["cols"]));
     setActive(true);
     setFirstClick(true);
     setMessage("MineSweeper");
@@ -91,8 +72,7 @@ function Game() {
 
     if (isFirstClick) {
       timer = setInterval(() => setTime(time => time + 1), 1000)
-      updatedBoard = createBoard(config.row, config.col, numberOfMines, x, y);
-      console.log(updatedBoard);
+      updatedBoard = createBoard(config.rows, config.cols, numberOfMines, x, y);
     }
     if (!isActive) return;
     if (!updatedBoard[y][x].isMarked) {
@@ -104,6 +84,7 @@ function Game() {
         setActive(false)
         setFirstClick(true)
         getGif(false)
+
       } else {
         const newArr = revealEmptyCells(updatedBoard, x, y);
         if (isWinner(updatedBoard, numberOfMines)) {
@@ -116,7 +97,27 @@ function Game() {
         setBoard(newArr);
       }
     }
-  };
+  }
+
+  const showRanks = () => {
+    const url = `https://minesweeper-back.herokuapp.com/record/level/${config.level}`
+    axios.get(url)
+      .then(data => setRankingTable(data.data))
+      .catch(err => console.error(`error getting rankings`, err))
+  }
+
+  const handleNewRank = () => {
+    const url = 'https://minesweeper-back.herokuapp.com/record'
+
+    axios.post(url, {
+      name: userName,
+      difficulty: gameModes[difficulty].level,
+      record: time,
+      date: new Date().getTime()
+    })
+      .then(data => showRanks())
+      .catch(err => console.error(`error getting rankings`, err))
+  }
 
   const handleRightClick = (x, y) => {
     if (!isActive || !arrBoard[y][x].isHidden) return;
@@ -131,11 +132,27 @@ function Game() {
         child={
           <div className="text-center">
             <div className={"py-2"}>
-              <h2>{message === "You Win" ? `Congratulations! you beat '${difficulty}' in ${time} seconds` : `You lose :(`}</h2>
+              <h2>{message === "You Win" ? `Congratulations! you beat '${gameModes[difficulty].name}' in ${time} seconds` : `You lose :(`}</h2>
             </div>
-            <div className={"py-2"}>
-              <img alt={"loading"} src={winGif} style={{ maxHeight: "60vh", maxWidth: "80vw" }} />
-            </div>
+
+            {
+              rankingData
+                ? <RankingTable data={rankingData}></RankingTable>
+                : [
+                  <div className={"row py-2"}>
+                    <h2>Enter your name: </h2>
+                    <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)}></input>
+                    <button className="btn btn-primary" onClick={handleNewRank}>
+                      Submit
+                    </button>
+                  </div>,
+                  <div className={"py-2"}>
+                    <img alt={"loading"} src={winGif} style={{ maxHeight: "60vh", maxWidth: "80vw" }} />
+                  </div>
+                ]
+            }
+
+
             <div className={"py-2"}>
               <button className="btn btn-primary" onClick={handleReset}>
                 Try again
@@ -151,21 +168,21 @@ function Game() {
         <div className="col-sm text-center" key="dropdown">
           <Dropdown>
             <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-              {difficulty[0].toUpperCase() + difficulty.slice(1)}
+              {gameModes[difficulty].name}
             </Dropdown.Toggle>
             <Dropdown.Menu>
               <Dropdown.Item onClick={() => setGameConfig("easy")}>
-                Easy 6x6
-            </Dropdown.Item>
+                {`${gameModes["easy"].name} ${gameModes["easy"].rows}x${gameModes["easy"].cols}`}
+              </Dropdown.Item>
               <Dropdown.Item onClick={() => setGameConfig("medium")}>
-                Medium 8x8
-            </Dropdown.Item>
+                {`${gameModes["medium"].name} ${gameModes["medium"].rows}x${gameModes["medium"].cols}`}
+              </Dropdown.Item>
               <Dropdown.Item onClick={() => setGameConfig("hard")}>
-                Hard 10x10
-            </Dropdown.Item>
-              <Dropdown.Item onClick={() => setGameConfig("godMode")}>
-                God Mode 12x12
-            </Dropdown.Item>
+                {`${gameModes["hard"].name} ${gameModes["hard"].rows}x${gameModes["hard"].cols}`}
+              </Dropdown.Item>
+              <Dropdown.Item onClick={() => setGameConfig("god")}>
+                {`${gameModes["god"].name} ${gameModes["god"].rows}x${gameModes["god"].cols}`}
+              </Dropdown.Item>
             </Dropdown.Menu>
           </Dropdown>
         </div>
