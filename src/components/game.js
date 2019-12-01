@@ -139,13 +139,15 @@ function Game() {
               rankingData
                 ? <RankingTable data={rankingData}></RankingTable>
                 : [
-                  <div className={"row py-2"}>
-                    <h2>Enter your name: </h2>
-                    <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)}></input>
-                    <button className="btn btn-primary" onClick={handleNewRank}>
-                      Submit
+                  message == "You Win"
+                    ? <div className={"row py-2"}>
+                      <h2>Enter your name: </h2>
+                      <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)}></input>
+                      <button className="btn btn-primary" onClick={handleNewRank}>
+                        Submit
                     </button>
-                  </div>,
+                    </div>
+                    : null,
                   <div className={"py-2"}>
                     <img alt={"loading"} src={winGif} style={{ maxHeight: "60vh", maxWidth: "80vw" }} />
                   </div>
