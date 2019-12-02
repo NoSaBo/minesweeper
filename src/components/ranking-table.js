@@ -1,7 +1,25 @@
 import * as React from 'react'
 
+const columns = [
+    {
+        key: "index",
+        title: "Position #"
+    },
+    {
+        key: "name",
+        title: "Player Name"
+    },
+    {
+        key: "record",
+        title: "Time in Seconds"
+    },
+    {
+        key: "date",
+        title: "Date"
+    }
+]
+
 export default function RankingTable(props) {
-    console.log(`props`,props)
     const formatData = (key, data) => {
         if (key == "date")
             return new Date(Number(data)).toLocaleDateString()
@@ -11,21 +29,23 @@ export default function RankingTable(props) {
     return props.data.length > 0
         ? <table className={"table table-sm table-info"}>
             <thead>
-                <tr>
+                <tr key={'header-row'}>
                     {
-                        Object.keys(props.data[0]).map(header => {
-                            return <th>{header}</th>
+                        columns.map(col => {
+                            return <th key={`header-${col.key}`}>{col.title}</th>
                         })
                     }
                 </tr>
             </thead>
             <tbody>
                 {
-                    props.data.map(row => {
-                        return <tr>
+                    props.data.map((row, rowIndex) => {
+                        return <tr key={`row-${rowIndex}`} className={`bg-light`}>
                             {
-                                Object.keys(row).map(key => {
-                                return <td>{formatData(key, row[key])}</td>
+                                columns.map((col, index) => {
+                                    return <td key={`cell-${col.key}`} >
+                                        {formatData(col.key, col.key === "index" ? rowIndex + 1 : row[col.key])}
+                                    </td>
                                 })
                             }
                         </tr>

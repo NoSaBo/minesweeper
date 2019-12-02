@@ -154,7 +154,6 @@ function Game() {
                 ]
             }
 
-
             <div className={"py-2"}>
               <button className="btn btn-primary" onClick={handleReset}>
                 Try again
