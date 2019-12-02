@@ -37,12 +37,12 @@ const createMines = (numberOfMines, cols, rows, xPos, yPos) => {
   const mines = [];
   while (numberOfMines) {
     let coord = { x: getRandomInteger(0, cols), y: getRandomInteger(0, rows) };
-    console.log(coord.x, coord.y, xPos, yPos);
+    // console.log(coord.x, coord.y, xPos, yPos);
     if (
       !mines.some(mine => mine.x === coord.x && mine.y === coord.y) &&
       checkIfMinesIsNotNeighbor(coord.x, coord.y, xPos, yPos)
     ) {
-      console.log(`pass`, coord.x, coord.y, xPos, yPos);
+      // console.log(`pass`, coord.x, coord.y, xPos, yPos);
       mines.push(coord);
       numberOfMines--;
     }
