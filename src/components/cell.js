@@ -25,7 +25,7 @@ function Cell(props) {
         className={`p-0 btn ${props.isHidden ? 'btn-secondary' : 'btn-light'}`}
         style={{ border: 'thin solid silver', height: "100%", width: "100%" }}
       >
-        {props.isMarked ? (
+        {props.isMarked && props.isHidden ? (
           <Flag width={wIconSize} height={wIconSize} color="whitesmoke" />
         ) : props.isHidden ? (
           <div style={{ }} />
