@@ -132,7 +132,7 @@ function Game() {
         child={
           <div className="text-center">
             <div className={"py-2"}>
-              <h2>{message === "You Win" ? `Congratulations! you beat '${gameModes[difficulty].name}' in ${time} seconds` : `You lose :(`}</h2>
+              <h3>{message === "You Win" ? `Congratulations! you beat '${gameModes[difficulty].name}' in ${time} seconds` : `You lose :(`}</h3>
             </div>
 
             {
@@ -140,8 +140,8 @@ function Game() {
                 ? <RankingTable data={rankingData}></RankingTable>
                 : [
                   message == "You Win"
-                    ? <div className={"row py-2"}>
-                      <h2>Enter your name: </h2>
+                    ? <div className={"py-2"}>
+                      <h3>Enter your name: </h3>
                       <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)}></input>
                       <button className="btn btn-primary" onClick={handleNewRank}>
                         Submit
