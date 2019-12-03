@@ -21,7 +21,7 @@ const columns = [
 
 export default function RankingTable(props) {
     const formatData = (key, data) => {
-        if (key == "date")
+        if (key === "date")
             return new Date(Number(data)).toLocaleDateString()
         else
             return data

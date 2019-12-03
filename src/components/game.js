@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Dropdown } from "react-bootstrap";
 import Board from "./board";
+import Meme from "./meme"
 import Modal from "./modal";
 import RankingTable from "./ranking-table";
 import {
@@ -27,10 +28,10 @@ function Game() {
   );
   const [difficulty, setDifficulty] = useState("medium")
   const [time, setTime] = useState(0)
-  const [winGif, setGif] = useState('')
   const [userName, setUserName] = useState('')
 
   const [rankingData, setRankingTable] = useState(false)
+  const [submittingData, setSubmittingData] = useState(false)
 
   const numberOfMines = Math.floor(config.rows * config.cols * config.density);
 
@@ -41,7 +42,6 @@ function Game() {
     setMessage("MineSweeper")
     setTime(0)
     setRankingTable(false)
-    setGif("")
   };
 
   const setGameConfig = str => {
@@ -54,17 +54,6 @@ function Game() {
     setDifficulty(str)
     clearInterval(timer)
     setTime(0)
-  }
-
-  const getGif = didWin => {
-    const tagWin = difficulty === "godMode" ? "epic" : "celebrate"
-    const tagLose = "cry"
-    const url = didWin
-      ? `https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=${tagWin}`
-      : `https://api.giphy.com/v1/gifs/random?api_key=NE2CZKYPQSvRQfbosCF1tTHdDRTmd9Su&tag=${tagLose}`
-    axios.get(url)
-      .then(data => setGif(data.data.data.image_url))
-      .catch(error => console.log(`error getting gif`, error))
   }
 
   const handleLeftClick = (x, y) => {
@@ -83,7 +72,6 @@ function Game() {
         clearInterval(timer)
         setActive(false)
         setFirstClick(true)
-        getGif(false)
 
       } else {
         const newArr = revealEmptyCells(updatedBoard, x, y);
@@ -91,7 +79,6 @@ function Game() {
           setMessage("You Win")
           setActive(false)
           clearInterval(timer)
-          getGif(true)
         }
         setFirstClick(false);
         setBoard(newArr);
@@ -102,11 +89,15 @@ function Game() {
   const showRanks = () => {
     const url = `https://minesweeper-back.herokuapp.com/record/level/${config.level}`
     axios.get(url)
-      .then(data => setRankingTable(data.data))
+      .then(data => {
+        setRankingTable(data.data)
+
+      })
       .catch(err => console.error(`error getting rankings`, err))
   }
 
-  const handleNewRank = () => {
+  const postNewRank = () => {
+    setSubmittingData(true)
     const url = 'https://minesweeper-back.herokuapp.com/record'
 
     axios.post(url, {
@@ -115,7 +106,10 @@ function Game() {
       record: time,
       date: new Date().getTime()
     })
-      .then(data => showRanks())
+      .then(data => {
+        showRanks()
+        setSubmittingData(false)
+      })
       .catch(err => console.error(`error getting rankings`, err))
   }
 
@@ -139,23 +133,21 @@ function Game() {
               rankingData
                 ? <RankingTable data={rankingData}></RankingTable>
                 : [
-                  message == "You Win"
+                  message === "You Win"
                     ? <div className={"py-2"}>
                       <h3>Enter your name: </h3>
-                      <input type="text" value={userName} onChange={(e) => setUserName(e.target.value)}></input>
-                      <button className="btn btn-primary" onClick={handleNewRank}>
-                        Submit
-                    </button>
+                      <input className="m-1" type="text" value={userName} onChange={(e) => setUserName(e.target.value)}></input>
+                      <button className="btn btn-primary btn-sm m-1" onClick={postNewRank} {...submittingData ? { disabled: true } : null}>
+                        {`${submittingData ? 'Submitting...' : 'Submit'}`}
+                      </button>
                     </div>
                     : null,
-                  <div className={"py-2"}>
-                    <img alt={"loading"} src={winGif} style={{ maxHeight: "60vh", maxWidth: "80vw" }} />
-                  </div>
+                  <Meme difficulty {...{ didWin: message === "You Win" ? true : false }} />
                 ]
             }
 
             <div className={"py-2"}>
-              <button className="btn btn-primary" onClick={handleReset}>
+              <button className="btn btn-primary btn-sm" onClick={handleReset}>
                 Try again
           </button>
             </div>
@@ -168,7 +160,7 @@ function Game() {
       <div className="row py-2 my-1" key="game-setup">
         <div className="col-sm text-center" key="dropdown">
           <Dropdown>
-            <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+            <Dropdown.Toggle variant="secondary" id="dropdown-basic" className={"btn-sm"}>
               {gameModes[difficulty].name}
             </Dropdown.Toggle>
             <Dropdown.Menu>
@@ -188,10 +180,10 @@ function Game() {
           </Dropdown>
         </div>
         <div className="col-sm text-center" key="number-of-mines">
-          Mines Left: {numberOfMines - arrBoard.reduce((accu, row) => accu + row.filter(cell => cell.isMarked).length, 0)}
+          Mines Left: <b> {numberOfMines - arrBoard.reduce((accu, row) => accu + row.filter(cell => cell.isMarked).length, 0)} </b>
         </div>
         <div className="col-sm text-center" key="timer">
-          {`${Math.floor(time / 60) < 10 ? '0' : ''}${Math.floor(time / 60)}:${time % 60 < 10 ? '0' : ''}${time % 60}`}
+          <b> {`${Math.floor(time / 60) < 10 ? '0' : ''}${Math.floor(time / 60)}:${time % 60 < 10 ? '0' : ''}${time % 60}`} </b>
         </div>
 
       </div>
